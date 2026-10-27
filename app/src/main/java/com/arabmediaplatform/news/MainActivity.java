@@ -13,6 +13,10 @@ import android.webkit.WebViewClient;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.Button;
+import android.webkit.JavascriptInterface;
+import android.view.Gravity;
+import android.graphics.Typeface;
 import android.graphics.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -23,6 +27,7 @@ public class MainActivity extends Activity {
     private static final String SITE_HOST = "news.arabmediaplatform.com";
     private WebView webView;
     private ProgressBar progressBar;
+    private Button homeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,17 @@ public class MainActivity extends Activity {
         FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, dp(3));
         root.addView(progressBar, progressParams);
+        homeButton = new Button(this);
+        homeButton.setText("الرئيسية");
+        homeButton.setTextColor(Color.WHITE);
+        homeButton.setTextSize(12);
+        homeButton.setTypeface(null, Typeface.BOLD);
+        homeButton.setAllCaps(false);
+        homeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(155, 20, 32)));
+        FrameLayout.LayoutParams homeParams = new FrameLayout.LayoutParams(dp(92), dp(42), Gravity.TOP | Gravity.START);
+        homeParams.setMargins(dp(10), dp(12), 0, 0);
+        root.addView(homeButton, homeParams);
+        homeButton.setOnClickListener(v -> loadHomeAsset());
         setContentView(root);
 
         WebSettings settings = webView.getSettings();
@@ -54,6 +70,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
+        webView.addJavascriptInterface(new RadioBridge(), "AMPRadio");
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -105,6 +122,31 @@ public class MainActivity extends Activity {
         }
     }
 
+    public class RadioBridge {
+        @JavascriptInterface
+        public void play(String streamUrl, int volume) {
+            Intent intent = new Intent(MainActivity.this, RadioPlaybackService.class);
+            intent.setAction(RadioPlaybackService.ACTION_PLAY);
+            intent.putExtra(RadioPlaybackService.EXTRA_URL, streamUrl);
+            intent.putExtra(RadioPlaybackService.EXTRA_VOLUME, Math.max(0, Math.min(100, volume)) / 100f);
+            if (android.os.Build.VERSION.SDK_INT >= 26) startForegroundService(intent);
+            else startService(intent);
+        }
+        @JavascriptInterface
+        public void stop() {
+            Intent intent = new Intent(MainActivity.this, RadioPlaybackService.class);
+            intent.setAction(RadioPlaybackService.ACTION_STOP);
+            startService(intent);
+        }
+        @JavascriptInterface
+        public void setVolume(int volume) {
+            Intent intent = new Intent(MainActivity.this, RadioPlaybackService.class);
+            intent.setAction(RadioPlaybackService.ACTION_VOLUME);
+            intent.putExtra(RadioPlaybackService.EXTRA_VOLUME, Math.max(0, Math.min(100, volume)) / 100f);
+            startService(intent);
+        }
+    }
+
     private boolean routeUrl(String rawUrl) {
         try {
             Uri uri = Uri.parse(rawUrl);
@@ -130,7 +172,7 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (webView != null && webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        else loadHomeAsset();
     }
 
     @Override
