@@ -1,1 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111216">
+<title>Arab Media Platform</title>
+<style>
+:root{
+  --bg:#111216; --bg2:#191a20; --red:#c8102e; --red2:#f02d4b;
+  --text:#f7f7f8; --muted:#a7a8b2; --line:rgba(255,255,255,.12);
+  --font:inherit;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+button,a,input{font:inherit}
+a{color:inherit;text-decoration:none}
+.amp-home{width:min(100%,620px);min-height:100vh;margin:auto;padding:22px 22px 30px;overflow:hidden;position:relative;background:
+ radial-gradient(ellipse at 50% 0%,rgba(200,16,46,.15),transparent 34%),
+ linear-gradient(180deg,#15161b 0%,#111216 52%,#15151a 100%)}
+.amp-home:before{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(240,45,75,.8),transparent)}
+.brand{display:flex;justify-content:center;align-items:center;padding:10px 0 22px}
+.brand img{width:clamp(115px,30vw,165px);height:auto;max-height:100px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(200,16,46,.12))}
+.section-kicker{font-size:11px;letter-spacing:1.8px;color:var(--muted);font-weight:700}
+.news-area{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;display:flex;align-items:center;gap:12px;min-width:0}
+.news-label{flex:0 0 auto;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#fff}
+.news-label:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--red2);box-shadow:0 0 12px rgba(240,45,75,.8);animation:dotBlink 1s ease-in-out infinite}
+.ticker-window{overflow:hidden;min-width:0;flex:1;mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent)}
+.ticker-track{display:flex;align-items:center;width:max-content;animation:ticker 48s linear infinite}
+.ticker-window:hover .ticker-track{animation-play-state:paused}
+.ticker-set{display:flex;align-items:center;flex:0 0 auto}
+.ticker-link{display:inline-flex;align-items:center;gap:18px;white-space:nowrap;padding:0 18px;font-size:13px;color:#e6e6ea;transition:color .2s}
+.ticker-link:hover{color:#fff}
+.ticker-link:after{content:"";width:4px;height:4px;border-radius:50%;background:var(--red2);opacity:.9;animation:dotBlink .9s ease-in-out infinite}
+.ticker-state{font-size:12px;color:var(--muted);white-space:nowrap}
+@keyframes ticker{to{transform:translateX(50%)}}
+@keyframes dotBlink{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 9px rgba(240,45,75,.75)}50%{opacity:.2;transform:scale(.72);box-shadow:0 0 1px rgba(240,45,75,.1)}}
+.radio-section{padding:30px 0 27px}
+.radio-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:19px}
+.radio-title{display:flex;align-items:center;gap:11px}
+.radio-mark{width:42px;height:42px;border-radius:13px;border:1px solid rgba(240,45,75,.32);background:linear-gradient(145deg,rgba(200,16,46,.18),rgba(255,255,255,.025));display:grid;place-items:center;color:#ff5369}
+.radio-mark svg{width:22px;height:22px}
+.radio-title h1{font-size:17px;line-height:1.35;margin:0 0 4px;font-weight:800}
+.radio-title p{font-size:11px;color:var(--muted);margin:0}
+.live-status{display:flex;align-items:center;gap:7px;font-size:11px;color:#c5c5cc;white-space:nowrap}
+.live-dot{width:7px;height:7px;background:#888;border-radius:50%}
+.live-status.playing .live-dot{background:#48d597;box-shadow:0 0 10px rgba(72,213,151,.6)}
+.player-row{display:flex;align-items:center;gap:15px}
+.play-btn{width:54px;height:54px;flex:0 0 54px;border:0;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#ed2343,#a90825);color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(200,16,46,.26);transition:transform .2s,box-shadow .2s}
+.play-btn:hover{transform:scale(1.04);box-shadow:0 10px 30px rgba(200,16,46,.36)}
+.play-btn svg{width:21px;height:21px;fill:currentColor}
+.wave-area{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;height:48px;overflow:hidden}
+.wave-bar{width:3px;min-width:2px;height:var(--h);border-radius:4px;background:linear-gradient(180deg,#f14a61,#9e1028);opacity:.8;transform-origin:center}
+.playing .wave-bar{animation:wave var(--d) ease-in-out infinite alternate}
+@keyframes wave{from{transform:scaleY(.35);opacity:.45}to{transform:scaleY(1);opacity:1}}
+.volume{display:flex;align-items:center;gap:8px;flex:0 0 130px}
+.volume svg{width:19px;height:19px;color:#b9bac2;flex:0 0 auto}
+.volume input{width:75px;accent-color:var(--red2);cursor:pointer}
+.volume-value{font-size:10px;color:var(--muted);width:27px;text-align:left;direction:ltr}
+.player-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding-top:13px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--muted)}
+.sound-note{display:flex;align-items:center;gap:7px}
+.sound-note span{width:5px;height:5px;border-radius:50%;background:var(--red2)}
+.enter-platform{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 18px;border-radius:14px;border:1px solid rgba(240,45,75,.35);background:linear-gradient(105deg,rgba(200,16,46,.16),rgba(255,255,255,.025) 75%);transition:border-color .2s,transform .2s}
+.enter-platform:hover{border-color:rgba(240,45,75,.8);transform:translateY(-1px)}
+.enter-copy{display:flex;flex-direction:column;gap:5px}
+.enter-copy strong{font-size:14px}
+.enter-copy span{font-size:11px;color:var(--muted)}
+.enter-arrow{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--red);flex:0 0 34px}
+.enter-arrow svg{width:18px;height:18px}
+.socials{display:flex;justify-content:center;align-items:center;gap:13px;padding:26px 0 12px}
+.social-link{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:#c4c5cd;transition:color .2s,border-color .2s,background .2s}
+.social-link:hover{color:#fff;border-color:rgba(240,45,75,.65);background:rgba(200,16,46,.12)}
+.social-link svg{width:17px;height:17px;fill:currentColor}
+.footer-note{text-align:center;color:#686a74;font-size:10px;margin-top:8px}
+.error-note{color:#ff9aa8;font-size:11px;margin-top:10px;display:none}
+@media(max-width:420px){
+ .amp-home{padding:16px 16px 25px}
+ .radio-section{padding:25px 0 23px}
+ .player-row{gap:10px}
+ .play-btn{width:48px;height:48px;flex-basis:48px}
+ .volume{flex-basis:88px;gap:5px}
+ .volume input{width:43px}
+ .volume-value{width:23px}
+ .wave-area{gap:2px}
+ .wave-bar{width:2px}
+ .ticker-link{font-size:12px;padding:0 13px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="amp-home">
+  <header class="brand">
+    <a href="https://news.arabmediaplatform.com/" aria-label="Arab Media Platform">
+      <img src="https://news.arabmediaplatform.com/wp-content/uploads/2026/09/amp-Recovered23.png" alt="Arab Media Platform">
+    </a>
+  </header>
 
+  <section class="news-area" aria-label="آخر الأخبار">
+    <div class="news-label">آخر الأخبار</div>
+    <div class="ticker-window">
+      <div class="ticker-track" id="tickerTrack">
+        <div class="ticker-set" id="tickerPrimary"><span class="ticker-state">جارٍ تحميل أحدث الأخبار...</span></div>
+        <div class="ticker-set" id="tickerClone" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+  <div class="error-note" id="newsError">تعذّر تحميل الأخبار حاليًا. حاول تحديث الصفحة لاحقًا.</div>
+
+  <section class="radio-section" aria-label="مشغل الراديو">
+    <div class="radio-top">
+      <div class="radio-title">
+        <div class="radio-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M7 6l10-4M7 11h.01M11 11h.01M15 11h.01M7 16h10"/></svg>
+        </div>
+        <div><h1>إذاعة المنصة</h1><p>Arab Media Platform · Radio</p></div>
+      </div>
+      <div class="live-status" id="liveStatus"><span class="live-dot"></span><span id="liveText">جاهز للبث</span></div>
+    </div>
+    <div class="player-row">
+      <button class="play-btn" id="playBtn" aria-label="تشغيل الراديو">
+        <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8c0-.8.9-1.3 1.6-.9l9 6.2c.6.4.6 1.3 0 1.7l-9 6.2c-.7.5-1.6 0-1.6-.9V5.8z"/></svg>
+      </button>
+      <div class="wave-area" id="waveArea" aria-hidden="true"></div>
+      <div class="volume">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 5.5a9 9 0 0 1 0 13"/></svg>
+        <input id="volumeSlider" type="range" min="0" max="100" value="80" aria-label="مستوى الصوت">
+        <span class="volume-value" id="volumeValue">80%</span>
+      </div>
+    </div>
+    <div class="player-foot"><span class="sound-note"><span></span> بث مباشر عبر المنصة</span><span id="playerMessage">اضغط تشغيل للاستماع</span></div>
+    <div class="error-note" id="radioError" style="display:none">تعذّر تشغيل البث. تأكد من صحة رابط البث واتصال الإنترنت.</div>
+    <audio id="radioAudio" preload="none" crossorigin="anonymous"></audio>
+  </section>
+
+  <a class="enter-platform" href="https://news.arabmediaplatform.com/">
+    <span class="enter-copy"><strong>اكتشف منصة الأخبار</strong><span>آخر التغطيات والتقارير من Arab Media Platform</span></span>
+    <span class="enter-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+  </a>
+
+  <nav class="socials" aria-label="تابعنا على وسائل التواصل">
+    <a class="social-link" href="https://www.facebook.com/AMP.ArabMediaPlatform" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.5 1.6-1.5h1.7V3.7c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.2v3.1H10v8h3.4z"/></svg></a>
+    <a class="social-link" href="#" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24"><path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4h-9zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.2-3.5a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg></a>
+    <a class="social-link" href="#" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.7V8.3l6.3 3.7-6.3 3.7z"/></svg></a>
+    <a class="social-link" href="#" aria-label="Telegram" title="Telegram"><svg viewBox="0 0 24 24"><path d="M21.8 3.2 18.5 20c-.2 1.2-.9 1.5-1.9.9l-5.2-3.8-2.5 2.4c-.3.3-.6.6-1.2.6l.4-5.3 9.7-8.8c.4-.4-.1-.6-.6-.2L5.2 13.4.1 11.8c-1.1-.3-1.1-1.1.2-1.6L20.2 2.6c.9-.3 1.8.2 1.6.6z"/></svg></a>
+  </nav>
+  <div class="footer-note">صوت الخبر · نبض الحدث</div>
+</main>
+<script>
+/* 1) WordPress REST API: latest published posts, newest first.
+   2) Add the direct radio stream URL below to enable playback.
+   3) Replace social href="#" values with your official social URLs. */
+const WP_POSTS_API = 'https://news.arabmediaplatform.com/wp-json/wp/v2/posts?per_page=10&orderby=date&order=desc&_fields=link,date,title';
+const STREAM_URL = 'https://custom-azura1.asurahosting.com/listen/arab_media_platform/radio.mp3';
+const REFRESH_MS = 5 * 60 * 1000;
+
+const tickerPrimary = document.getElementById('tickerPrimary');
+const tickerClone = document.getElementById('tickerClone');
+const newsError = document.getElementById('newsError');
+const track = document.getElementById('tickerTrack');
+
+function makeTickerSet(posts) {
+  const set = document.createElement('div');
+  set.className = 'ticker-set';
+  posts.forEach(post => {
+    const a = document.createElement('a');
+    a.className = 'ticker-link';
+    a.href = post.link;
+    a.innerHTML = '';
+    a.textContent = post.title && post.title.rendered
+      ? post.title.rendered.replace(/<[^>]*>/g, '').replace(/&#038;/g, '&').replace(/&amp;/g, '&').replace(/&#8217;/g, '’').replace(/&#8216;/g, '‘').replace(/&#8220;/g, '“').replace(/&#8221;/g, '”')
+      : 'اقرأ آخر الأخبار على المنصة';
+    set.appendChild(a);
+  });
+  return set;
+}
+async function loadLatestNews() {
+  try {
+    const response = await fetch(WP_POSTS_API, { cache: 'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const posts = await response.json();
+    if (!Array.isArray(posts) || !posts.length) throw new Error('No posts');
+    tickerPrimary.replaceWith(makeTickerSet(posts));
+    const newPrimary = track.querySelector('.ticker-set:not([aria-hidden="true"])');
+    const clone = newPrimary.cloneNode(true);
+    clone.id = 'tickerClone';
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('a').forEach(a => a.setAttribute('tabindex', '-1'));
+    tickerClone.replaceWith(clone);
+    // Tune speed based on ticker length for comfortable reading.
+    const duration = Math.max(32, Math.min(75, newPrimary.scrollWidth / 28));
+    track.style.animationDuration = duration + 's';
+    newsError.style.display = 'none';
+  } catch (error) {
+    newsError.style.display = 'block';
+    if (!tickerPrimary.querySelector('a')) {
+      tickerPrimary.innerHTML = '';
+      const fallback = document.createElement('a');
+      fallback.className = 'ticker-link';
+      fallback.href = 'https://news.arabmediaplatform.com/';
+      fallback.textContent = 'تابع أحدث الأخبار والتغطيات على منصة Arab Media Platform';
+      tickerPrimary.appendChild(fallback);
+      tickerClone.innerHTML = tickerPrimary.innerHTML;
+    }
+  }
+}
+loadLatestNews();
+setInterval(loadLatestNews, REFRESH_MS);
+
+const audio = document.getElementById('radioAudio');
+const playBtn = document.getElementById('playBtn');
+const playIcon = document.getElementById('playIcon');
+const liveStatus = document.getElementById('liveStatus');
+const liveText = document.getElementById('liveText');
+const playerMessage = document.getElementById('playerMessage');
+const radioError = document.getElementById('radioError');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeValue = document.getElementById('volumeValue');
+const waveArea = document.getElementById('waveArea');
+
+for (let i = 0; i < 42; i++) {
+  const bar = document.createElement('span');
+  bar.className = 'wave-bar';
+  bar.style.setProperty('--h', (8 + Math.round(Math.abs(Math.sin(i * 1.71) * Math.cos(i * .43)) * 35)) + 'px');
+  bar.style.setProperty('--d', (0.35 + (i % 9) * 0.09) + 's');
+  waveArea.appendChild(bar);
+}
+audio.volume = 0.8;
+volumeSlider.addEventListener('input', () => {
+  audio.volume = Number(volumeSlider.value) / 100;
+  volumeValue.textContent = volumeSlider.value + '%';
+});
+function setPlaying(playing) {
+  waveArea.classList.toggle('playing', playing);
+  liveStatus.classList.toggle('playing', playing);
+  liveText.textContent = playing ? 'على الهواء' : 'متوقف';
+  playerMessage.textContent = playing ? 'أنت تستمع الآن' : 'اضغط تشغيل للاستماع';
+  playBtn.setAttribute('aria-label', playing ? 'إيقاف الراديو' : 'تشغيل الراديو');
+  playIcon.innerHTML = playing
+    ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
+    : '<path d="M8 5.8c0-.8.9-1.3 1.6-.9l9 6.2c.6.4.6 1.3 0 1.7l-9 6.2c-.7.5-1.6 0-1.6-.9V5.8z"/>';
+}
+playBtn.addEventListener('click', async () => {
+  if (!STREAM_URL) {
+    radioError.style.display = 'block';
+    playerMessage.textContent = 'رابط البث يحتاج إلى إعداد';
+    return;
+  }
+  radioError.style.display = 'none';
+  if (audio.paused) {
+    try {
+      if (!audio.src) audio.src = STREAM_URL;
+      await audio.play();
+      setPlaying(true);
+    } catch (e) {
+      playerMessage.textContent = 'تعذّر الاتصال بالبث';
+      radioError.textContent = 'تحقق من رابط البث المباشر وأنه يعمل عبر HTTPS.';
+      radioError.style.display = 'block';
+    }
+  } else {
+    audio.pause();
+    setPlaying(false);
+  }
+});
+audio.addEventListener('ended', () => setPlaying(false));
+audio.addEventListener('pause', () => setPlaying(false));
+audio.addEventListener('play', () => setPlaying(true));
+</script>
+</body>
+</html>
