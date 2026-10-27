@@ -229,6 +229,7 @@ for (let i = 0; i < 42; i++) {
 audio.volume = 0.8;
 volumeSlider.addEventListener('input', () => {
   audio.volume = Number(volumeSlider.value) / 100;
+  if (window.AMPRadio) window.AMPRadio.setVolume(Number(volumeSlider.value));
   volumeValue.textContent = volumeSlider.value + '%';
 });
 function setPlaying(playing) {
@@ -250,6 +251,12 @@ playBtn.addEventListener('click', async () => {
   radioError.style.display = 'none';
   if (audio.paused) {
     try {
+      if (window.AMPRadio) {
+        window.AMPRadio.play(STREAM_URL, Number(volumeSlider.value));
+        setPlaying(true);
+        playerMessage.textContent = 'بدأ تشغيل الراديو؛ يستمر في الخلفية';
+        return;
+      }
       if (!audio.src) audio.src = STREAM_URL;
       await audio.play();
       setPlaying(true);
@@ -259,6 +266,7 @@ playBtn.addEventListener('click', async () => {
       radioError.style.display = 'block';
     }
   } else {
+    if (window.AMPRadio) window.AMPRadio.stop();
     audio.pause();
     setPlaying(false);
   }
