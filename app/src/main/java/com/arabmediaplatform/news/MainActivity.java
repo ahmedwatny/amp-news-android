@@ -11,14 +11,15 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.graphics.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
-    private static final String HOME_URL = "https://news.arabmediaplatform.com/";
+    private static final String BASE_URL = "https://news.arabmediaplatform.com/";
     private static final String SITE_HOST = "news.arabmediaplatform.com";
     private WebView webView;
     private ProgressBar progressBar;
@@ -34,7 +35,6 @@ public class MainActivity extends Activity {
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progressBar.setMax(100);
         progressBar.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.rgb(190, 25, 40)));
-
         root.addView(webView, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
         setContentView(root);
 
         WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true); // Required by many WordPress themes and media players.
+        settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setLoadsImagesAutomatically(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
@@ -59,18 +59,15 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return routeUrl(request.getUrl().toString());
             }
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return routeUrl(url);
             }
-
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 progressBar.setVisibility(View.VISIBLE);
                 progressBar.setProgress(5);
             }
-
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setProgress(100);
@@ -85,14 +82,29 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState);
+        if (savedInstanceState != null && webView.restoreState(savedInstanceState) != null) {
+            // Restored the existing WebView navigation state.
         } else {
-            webView.loadUrl(HOME_URL);
+            loadHomeAsset();
         }
     }
 
-    // Keep the news website inside the app; open external sites and app links in the browser.
+    private void loadHomeAsset() {
+        try (InputStream input = getAssets().open("index.html");
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+            String html = new String(output.toByteArray(), StandardCharsets.UTF_8);
+            // Using the site as base URL gives the local homepage the site's origin for WP REST API requests.
+            webView.loadDataWithBaseURL(BASE_URL, html, "text/html", "UTF-8", BASE_URL);
+        } catch (Exception e) {
+            webView.loadDataWithBaseURL(BASE_URL,
+                    "<html><meta charset='utf-8'><body style='background:#111216;color:white;font-family:sans-serif;padding:24px;direction:rtl'>تعذّر فتح صفحة البداية. حاول إعادة تثبيت التطبيق.</body></html>",
+                    "text/html", "UTF-8", BASE_URL);
+        }
+    }
+
     private boolean routeUrl(String rawUrl) {
         try {
             Uri uri = Uri.parse(rawUrl);
@@ -100,16 +112,13 @@ public class MainActivity extends Activity {
             if ((scheme.equals("https") || scheme.equals("http")) && SITE_HOST.equalsIgnoreCase(uri.getHost())) {
                 return false;
             }
-            if (scheme.equals("http") || scheme.equals("https")) {
-                startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                return true;
-            }
-            if (scheme.equals("mailto") || scheme.equals("tel") || scheme.equals("whatsapp")) {
+            if (scheme.equals("http") || scheme.equals("https") || scheme.equals("mailto") ||
+                    scheme.equals("tel") || scheme.equals("whatsapp")) {
                 startActivity(new Intent(Intent.ACTION_VIEW, uri));
                 return true;
             }
         } catch (Exception ignored) {
-            // Unsupported or malformed links remain blocked instead of crashing the app.
+            // Unsupported links are blocked instead of crashing the app.
         }
         return true;
     }
@@ -120,11 +129,8 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
-        }
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
     }
 
     @Override
