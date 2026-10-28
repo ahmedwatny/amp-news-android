@@ -34,6 +34,11 @@ a{color:inherit;text-decoration:none}
 .ticker-link:hover{color:#fff}
 .ticker-link:after{content:"";width:4px;height:4px;border-radius:50%;background:var(--red2);opacity:.9;animation:dotBlink .9s ease-in-out infinite}
 .ticker-state{font-size:12px;color:var(--muted);white-space:nowrap}
+.ad-slot{margin:14px 0 0;min-height:94px;border:1px dashed rgba(255,255,255,.2);border-radius:12px;background:linear-gradient(110deg,rgba(255,255,255,.025),rgba(200,16,46,.055),rgba(255,255,255,.02));display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;position:relative;overflow:hidden}
+.ad-slot:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,transparent,var(--red),transparent)}
+.ad-slot-label{font-size:10px;letter-spacing:.5px;color:#777984;position:absolute;top:7px;right:10px}
+.ad-slot-content{font-size:12px;color:#a7a8b2}
+.ad-slot-content strong{display:block;font-size:14px;color:#e6e6ea;margin-bottom:4px}
 @keyframes ticker{to{transform:translateX(50%)}}
 @keyframes dotBlink{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 9px rgba(240,45,75,.75)}50%{opacity:.2;transform:scale(.72);box-shadow:0 0 1px rgba(240,45,75,.1)}}
 .radio-section{padding:30px 0 27px}
@@ -107,6 +112,11 @@ a{color:inherit;text-decoration:none}
     </div>
   </section>
   <div class="error-note" id="newsError">تعذّر تحميل الأخبار حاليًا. حاول تحديث الصفحة لاحقًا.</div>
+
+  <section class="ad-slot" aria-label="مساحة إعلانية">
+    <span class="ad-slot-label">إعلان</span>
+    <div class="ad-slot-content"><strong>مساحة إعلانية</strong><span>يمكن إضافة إعلان المنصة هنا لاحقًا</span></div>
+  </section>
 
   <section class="radio-section" aria-label="مشغل الراديو">
     <div class="radio-top">
@@ -227,12 +237,14 @@ for (let i = 0; i < 42; i++) {
   waveArea.appendChild(bar);
 }
 audio.volume = 0.8;
+let nativeRadioPlaying = false;
 volumeSlider.addEventListener('input', () => {
   audio.volume = Number(volumeSlider.value) / 100;
   if (window.AMPRadio) window.AMPRadio.setVolume(Number(volumeSlider.value));
   volumeValue.textContent = volumeSlider.value + '%';
 });
 function setPlaying(playing) {
+  nativeRadioPlaying = playing;
   waveArea.classList.toggle('playing', playing);
   liveStatus.classList.toggle('playing', playing);
   liveText.textContent = playing ? 'على الهواء' : 'متوقف';
@@ -249,7 +261,8 @@ playBtn.addEventListener('click', async () => {
     return;
   }
   radioError.style.display = 'none';
-  if (audio.paused) {
+  const currentlyPlaying = window.AMPRadio ? nativeRadioPlaying : !audio.paused;
+  if (!currentlyPlaying) {
     try {
       if (window.AMPRadio) {
         window.AMPRadio.play(STREAM_URL, Number(volumeSlider.value));
@@ -271,6 +284,8 @@ playBtn.addEventListener('click', async () => {
     setPlaying(false);
   }
 });
+window.onNativeRadioStateChanged = function(playing) { setPlaying(!!playing); };
+if (window.AMPRadio && window.AMPRadio.isPlaying()) setPlaying(true);
 audio.addEventListener('ended', () => setPlaying(false));
 audio.addEventListener('pause', () => setPlaying(false));
 audio.addEventListener('play', () => setPlaying(true));
