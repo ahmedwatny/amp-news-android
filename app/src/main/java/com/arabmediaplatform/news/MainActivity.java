@@ -1,10 +1,16 @@
 package com.arabmediaplatform.news;
 
 import android.app.Activity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.content.Intent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import androidx.core.content.ContextCompat;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -13,10 +19,7 @@ import android.webkit.WebViewClient;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Button;
 import android.webkit.JavascriptInterface;
-import android.view.Gravity;
-import android.graphics.Typeface;
 import android.graphics.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -27,7 +30,7 @@ public class MainActivity extends Activity {
     private static final String SITE_HOST = "news.arabmediaplatform.com";
     private WebView webView;
     private ProgressBar progressBar;
-    private Button homeButton;
+    private BroadcastReceiver radioStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +48,11 @@ public class MainActivity extends Activity {
         FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, dp(3));
         root.addView(progressBar, progressParams);
-        homeButton = new Button(this);
-        homeButton.setText("الرئيسية");
-        homeButton.setTextColor(Color.WHITE);
-        homeButton.setTextSize(12);
-        homeButton.setTypeface(null, Typeface.BOLD);
-        homeButton.setAllCaps(false);
-        homeButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(155, 20, 32)));
-        FrameLayout.LayoutParams homeParams = new FrameLayout.LayoutParams(dp(92), dp(42), Gravity.TOP | Gravity.START);
-        homeParams.setMargins(dp(10), dp(12), 0, 0);
-        root.addView(homeButton, homeParams);
-        homeButton.setOnClickListener(v -> loadHomeAsset());
         setContentView(root);
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 4103);
+        }
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -71,6 +67,14 @@ public class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         webView.addJavascriptInterface(new RadioBridge(), "AMPRadio");
+        radioStateReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                boolean playing = intent.getBooleanExtra(RadioPlaybackService.EXTRA_IS_PLAYING, false);
+                if (webView != null) webView.evaluateJavascript("if(window.onNativeRadioStateChanged){window.onNativeRadioStateChanged(" + playing + ");}", null);
+            }
+        };
+        ContextCompat.registerReceiver(this, radioStateReceiver,
+                new IntentFilter(RadioPlaybackService.ACTION_STATE_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -123,6 +127,10 @@ public class MainActivity extends Activity {
     }
 
     public class RadioBridge {
+        @JavascriptInterface
+        public boolean isPlaying() {
+            return getSharedPreferences("amp_radio", MODE_PRIVATE).getBoolean("was_playing", false);
+        }
         @JavascriptInterface
         public void play(String streamUrl, int volume) {
             Intent intent = new Intent(MainActivity.this, RadioPlaybackService.class);
@@ -183,6 +191,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (radioStateReceiver != null) { try { unregisterReceiver(radioStateReceiver); } catch (Exception ignored) {} radioStateReceiver = null; }
         if (webView != null) {
             webView.stopLoading();
             webView.setWebChromeClient(null);
